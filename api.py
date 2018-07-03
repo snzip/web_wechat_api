@@ -1,6 +1,13 @@
+# -*- coding: utf-8 -*- 
+
 from flask import Flask, url_for
 from flask import jsonify
 from flask import request
+from flask import render_template
+
+from flask_login import LoginManager, UserMixin, login_required
+
+
 import itchat
 from itchat.content import *
 import base64
@@ -14,6 +21,8 @@ import urllib.request
 from urllib.parse   import quote
 from urllib.request import urlopen
 import threading
+
+
 
 # 心跳,向文件传输助手定时推送保证不被登出
 # def keep_sending(itchat):
@@ -106,6 +115,38 @@ def QR_to_b64(uuid, status, qrcode):
   return qr_b64
 
 app = Flask(__name__)
+ 
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+
+class User(UserMixin):
+    # proxy for a database of users
+    user_database = {"JohnDoe": ("JohnDoe", "John"),
+               "JaneDoe": ("JaneDoe", "Jane")}
+
+    def __init__(self, username, password):
+        self.id = username
+        self.password = password
+
+    @classmethod
+    def get(cls,id):
+        return cls.user_database.get(id)
+
+@login_manager.request_loader
+def load_user(request):
+    token = request.headers.get('Authorization')
+    if token is None:
+        token = request.args.get('token')
+
+    if token is not None:
+        username,password = token.split(":") # naive token
+        user_entry = User.get(username)
+        if (user_entry is not None):
+            user = User(user_entry[0],user_entry[1])
+            if (user.password == password):
+                return user
+    return None
 
 
 thread = Thread()
@@ -118,7 +159,7 @@ def api_wechat_login():
     itchat.get_QR(uuid=uuid, qrCallback=QR_to_b64)
     print(thread.is_alive())
     if thread.is_alive():
-        return jsonify({'success': 0, 'msg': '已有登陆线程存在' })
+        return jsonify({'success': 0, 'msg': '已有登陆线程存在', 'qr': qr_b64.decode("utf-8")  })
 
     # thread = task(monitor_login,itchat)
     thread = Thread(target = monitor_login, args = (itchat, ))
@@ -138,7 +179,7 @@ def wechat_check_login():
 def send_msg():
     # itchat.send_msg('Hello, filehelper呀这是接口发送', toUserName='filehelper')
     try:
-        data = json.loads(request.data)
+        data = json.loads(request.data.decode('utf-8'))
         msg = data['msg']
         userName = data['UserName']
         if len(itchat.get_friends()) != 0:
@@ -251,6 +292,25 @@ def logout():
     except Exception as e:
         return jsonify({'success': 0, 'msg': "Error {0}".format(str(e))})  
 
+@app.route('/weblogin/') 
+@app.route('/weblogin/<name>')
+@login_required
+def hello(name=None):
+    
+    global thread
+    uuid = itchat.get_QRuuid()
+    itchat.get_QR(uuid=uuid, qrCallback=QR_to_b64)
+    print(thread.is_alive())
+    if thread.is_alive():
+        return render_template('login.html', name=name,info={'success': 1, 'msg': '已有登陆线程存在', 'qr': qr_b64.decode("utf-8") })  
+ 
+
+    # thread = task(monitor_login,itchat)
+    thread = Thread(target = monitor_login, args = (itchat, ))
+    thread.start()
+    return render_template('login.html', name=name,info={'success': 1, 'qr': qr_b64.decode("utf-8") })  
+
 if __name__ == '__main__':
-    app.run(port=9118)
-    # app.run(debug=True, port=9118)
+	# export FLASK_ENV=development
+    #app.run(port=9118)
+    app.run(debug=True, port=9118)

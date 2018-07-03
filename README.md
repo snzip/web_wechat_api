@@ -10,6 +10,7 @@
 # 建议python3
 $ sudo pip install itchat
 $ sudo pip install flask
+$ pip install flask-login
 ```
 
 # 启动
