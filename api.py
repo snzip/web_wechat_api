@@ -104,7 +104,9 @@ def monitor_login(itchat):
     itchat.show_mobile_login()
     itchat.get_contact(True) 
     # you can do your business here
-    itchat.start_receiving()
+    # itchat.start_receiving()
+
+    # add heartbeat
     itchat.run()
 
 # 将二维码转化为base64 string, 简单的使用了全局变量
