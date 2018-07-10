@@ -125,7 +125,8 @@ login_manager.init_app(app)
 class User(UserMixin):
     # proxy for a database of users
     user_database = {"JohnDoe": ("JohnDoe", "John"),
-               "JaneDoe": ("JaneDoe", "Jane")}
+               "JaneDoe": ("JaneDoe", "Jane"),
+               "Mike": ("admin", "Mike")}
 
     def __init__(self, username, password):
         self.id = username
@@ -315,4 +316,4 @@ def hello(name=None):
 if __name__ == '__main__':
 	# export FLASK_ENV=development
     #app.run(port=9118)
-    app.run(debug=True, port=9118)
+    app.run(debug=True, port=80, host='0.0.0.0')
