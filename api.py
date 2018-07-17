@@ -25,18 +25,18 @@ import threading
 
 
 # 心跳,向文件传输助手定时推送保证不被登出
-# def keep_sending(itchat):
-#   while 1:
-#       try:
-#           time_str = time.strftime('%Y-%m-%d-%H:%M:%S',time.localtime(time.time()))
-#           result = itchat.send_msg((time_str + " 还活着呢"), toUserName='filehelper')
-#           Ret = result['BaseResponse']['Ret']
-#           if Ret != 0:
-#               return
-#           sleep(10)
-#       except Exception as e:
-#           print("Error {0}".format(str(e)))
-#           return 
+def keep_sending(itchat):
+  while 1:
+      try:
+          time_str = time.strftime('%Y-%m-%d-%H:%M:%S',time.localtime(time.time()))
+          result = itchat.send_msg((time_str + " 还活着呢"), toUserName='filehelper')
+          Ret = result['BaseResponse']['Ret']
+          if Ret != 0:
+              return
+          sleep(100)
+      except Exception as e:
+          print("Error {0}".format(str(e)))
+          return 
 
 # 自动回复
 @itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING])
