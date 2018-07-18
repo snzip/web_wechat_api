@@ -187,6 +187,7 @@ def send_msg():
         data = json.loads(request.data.decode('utf-8'))
         msg = data['msg']
         userName = data['UserName']
+        
         if len(itchat.get_friends()) != 0:
             result = itchat.send_msg(msg, toUserName=userName)
             # <ItchatReturnValue: {'BaseResponse': {'Ret': 0, 'ErrMsg': '请求成功', 'RawMsg': '请求成功'}, 'MsgID': '1034229085747027697', 'LocalID': '14887975733746'}>
@@ -195,8 +196,40 @@ def send_msg():
             return jsonify({'success': 1, 'msg': '成功发送', 'Ret': Ret})
         else:
             return jsonify({'success': 0, 'msg': '尚未登陆'})  
+
     except Exception as e:
         return jsonify({'success': 0, 'msg': "Error {0}".format(str(e))})  
+
+# curl -d '{"msg": "你好啊", "groupName": "filehelper"}' 'http://127.0.0.1:9118/send_msg' -H Content-Type:application/json -v
+# 发送消息
+@app.route('/send_group_msg', methods=['GET', 'POST'])
+def send_group_msg():
+    # itchat.send_msg('Hello, filehelper呀这是接口发送', toUserName='filehelper')
+    try:
+        data = json.loads(request.data.decode('utf-8'))
+        msg = data['msg']
+        groupName=data['groupName']
+        
+        
+        if len(itchat.get_friends()) != 0:
+            group_name = itchat.search_chatrooms(groupName)
+            if len(group_name) > 0:
+                result = group_name[0].send(msg )
+            else:
+                print(groupName + " is not exist.")
+                return jsonify({'success': 1, 'msg': groupName + " is not exist."}) 
+
+            # result = itchat.send_msg(msg, toUserName=userName)
+            # <ItchatReturnValue: {'BaseResponse': {'Ret': 0, 'ErrMsg': '请求成功', 'RawMsg': '请求成功'}, 'MsgID': '1034229085747027697', 'LocalID': '14887975733746'}>
+            print(result)
+            Ret = result['BaseResponse']['Ret']
+            return jsonify({'success': 1, 'msg': '成功发送', 'Ret': Ret})
+        else:
+            return jsonify({'success': 0, 'msg': '尚未登陆'})  
+
+    except Exception as e:
+        return jsonify({'success': 0, 'msg': "Error {0}".format(str(e))})  
+
 
 
 # curl -d '{"fileDir": "/images/qr_code.png", "UserName": "filehelper"}' 'http://127.0.0.1:9118/send_image' -H Content-Type:application/json -v
@@ -231,6 +264,7 @@ def get_chatrooms():
 # 获取微信好友
 # curl 'http://127.0.0.1:9118/get_friends' -H Content-Type:application/json -v
 @app.route('/get_friends', methods=['GET', 'POST'])
+@login_required
 def get_friends():
     try:
         return jsonify({'success': 1, 'data':itchat.get_friends()})
@@ -299,7 +333,7 @@ def logout():
 
 @app.route('/weblogin/') 
 @app.route('/weblogin/<name>')
-@login_required
+# @login_required
 def hello(name=None):
     
     global thread
@@ -318,4 +352,4 @@ def hello(name=None):
 if __name__ == '__main__':
 	# export FLASK_ENV=development
     #app.run(port=9118)
-    app.run(debug=True, port=80, host='0.0.0.0')
+    app.run(debug=True, port=8880, host='0.0.0.0')
