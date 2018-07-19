@@ -103,6 +103,7 @@ def monitor_login(itchat):
     itchat.web_init()
     itchat.show_mobile_login()
     itchat.get_contact(True) 
+    itchat.get_chatrooms(True)
     
     # you can do your business here
     # itchat.start_receiving()
@@ -256,7 +257,7 @@ def send_image():
 @app.route('/get_chatrooms', methods=['GET', 'POST'])
 def get_chatrooms():
     try:
-        return jsonify({'success': 1, 'data': itchat.get_chatrooms()})
+        return jsonify({'success': 1, 'data': itchat.get_chatrooms(True)})
     except Exception as e:
         return jsonify({'success': 0, 'msg': "Error {0}".format(str(e))})  
 
@@ -267,7 +268,7 @@ def get_chatrooms():
 @login_required
 def get_friends():
     try:
-        return jsonify({'success': 1, 'data':itchat.get_friends()})
+        return jsonify({'success': 1, 'data':itchat.get_friends(True)})
     except Exception as e:
         return jsonify({'success': 0, 'msg': "Error {0}".format(str(e))})  
 
@@ -301,7 +302,7 @@ def search_friends():
 @app.route('/search_chatrooms', methods=['GET', 'POST'])
 def search_chatrooms():
     try:
-        data = json.loads(request.data)
+        data = json.loads(request.data.decode('utf-8'))
         name = data['name']
         return jsonify({'success': 1, 'data': itchat.search_chatrooms(name=name)})
     except Exception as e:
