@@ -161,8 +161,12 @@ thread = Thread()
 @app.route('/wechat_login')
 def api_wechat_login():
     global thread
-    uuid = itchat.get_QRuuid()
-    itchat.get_QR(uuid=uuid, qrCallback=QR_to_b64)
+    # uuid = itchat.get_QRuuid()
+
+    # itchat.get_QR(uuid=uuid, qrCallback=QR_to_b64)
+  
+    itchat.auto_login(enableCmdQR=False, hotReload=True,qrCallback=QR_to_b64)
+
     print(thread.is_alive())
     if thread.is_alive():
         return jsonify({'success': 0, 'msg': '已有登陆线程存在', 'qr': qr_b64.decode("utf-8")  })
@@ -338,8 +342,11 @@ def logout():
 def hello(name=None):
     
     global thread
-    uuid = itchat.get_QRuuid()
-    itchat.get_QR(uuid=uuid, qrCallback=QR_to_b64)
+    # uuid = itchat.get_QRuuid()
+    # itchat.get_QR(uuid=uuid, qrCallback=QR_to_b64)
+    
+    itchat.auto_login(enableCmdQR=False, hotReload=True,qrCallback=QR_to_b64)
+
     print(thread.is_alive())
     if thread.is_alive():
         return render_template('login.html', name=name,info={'success': 1, 'msg': '已有登陆线程存在', 'qr': qr_b64.decode("utf-8") })  
