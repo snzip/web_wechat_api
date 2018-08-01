@@ -108,8 +108,6 @@ def monitor_login(itchat):
     # you can do your business here
     # itchat.start_receiving()
 
-    # add heartbeat
-    keep_sending(itchat)
     itchat.run()
 
 # 将二维码转化为base64 string, 简单的使用了全局变量
@@ -359,7 +357,7 @@ def hello(name=None):
     return render_template('login.html', name=name,info={'success': 1, 'qr': qr_b64.decode("utf-8") })  
 
 def code_login(itchat):
-    itchat.auto_login(enableCmdQR=False, hotReload=True,qrCallback=QR_to_b64,exitCallback=login)
+    itchat.auto_login(enableCmdQR=False, hotReload=True,qrCallback=QR_to_b64,exitCallback=login, loginCallback=loginCallback)
 
 
 def login():
@@ -370,6 +368,9 @@ def login():
     thread = Thread(target = code_login, args = (itchat, ))
     thread.start()
 
+def loginCallback():
+    # add heartbeat
+    keep_sending(itchat)
 
 if __name__ == '__main__':
 	# export FLASK_ENV=development
