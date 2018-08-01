@@ -116,6 +116,7 @@ def monitor_login(itchat):
 qr_b64 = ""
 def QR_to_b64(uuid, status, qrcode):
   global qr_b64
+  print("got QR code")
   qr_b64 = base64.b64encode(qrcode)
   return qr_b64
 
@@ -344,18 +345,31 @@ def hello(name=None):
     global thread
     # uuid = itchat.get_QRuuid()
     # itchat.get_QR(uuid=uuid, qrCallback=QR_to_b64)
+    print(thread.is_alive())
     
-    itchat.auto_login(enableCmdQR=False, hotReload=True,qrCallback=QR_to_b64)
-
+    
     print(thread.is_alive())
     if thread.is_alive():
         return render_template('login.html', name=name,info={'success': 1, 'msg': '已有登陆线程存在', 'qr': qr_b64.decode("utf-8") })  
  
 
     # thread = task(monitor_login,itchat)
-    thread = Thread(target = monitor_login, args = (itchat, ))
-    thread.start()
+    login()
+    # print(this)
     return render_template('login.html', name=name,info={'success': 1, 'qr': qr_b64.decode("utf-8") })  
+
+def code_login(itchat):
+    itchat.auto_login(enableCmdQR=False, hotReload=True,qrCallback=QR_to_b64,exitCallback=login)
+
+
+def login():
+    print("logged out.")
+
+    print("relogin.")
+    global thread
+    thread = Thread(target = code_login, args = (itchat, ))
+    thread.start()
+
 
 if __name__ == '__main__':
 	# export FLASK_ENV=development
